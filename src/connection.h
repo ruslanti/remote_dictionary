@@ -27,8 +27,6 @@ public:
     Response operator()(const T &t);
 
 private:
-
-
     std::array<uint8_t, 1024> m_data;
     boost::asio::ip::tcp::socket m_socket;
     IDictionary &m_dictionary;

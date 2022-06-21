@@ -29,9 +29,11 @@ private:
     void accept();
 
     std::map<std::string, std::string> m_dictionary;
+    // dictionary mutex
     mutable std::shared_mutex m_dictionary_mutex;
     boost::asio::ip::tcp::acceptor m_acceptor;
     boost::asio::ip::tcp::socket m_socket;
+    //stats counters
     mutable std::size_t m_total{0};
     mutable std::size_t m_success{0};
     mutable std::size_t m_fail{0};

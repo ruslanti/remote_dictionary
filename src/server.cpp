@@ -23,6 +23,9 @@ Server::~Server() {
     m_acceptor.close();
 }
 
+/**
+ * Socket accept and create new connection.
+ */
 void Server::accept() {
     m_acceptor.async_accept(m_socket,
                             [this](boost::system::error_code error) {
@@ -40,8 +43,9 @@ void Server::accept() {
 }
 
 std::optional<std::string> Server::get(std::string key) const {
-    ++m_total;
+    // read lock
     std::shared_lock lock(m_dictionary_mutex);
+    ++m_total;
     auto it = m_dictionary.find(key);
     if (it != m_dictionary.end()) {
         ++m_success;
@@ -53,17 +57,21 @@ std::optional<std::string> Server::get(std::string key) const {
 };
 
 void Server::set(std::string key, std::string value) {
+    // write lock
     std::unique_lock lock(m_dictionary_mutex);
     m_dictionary.insert(make_pair(key, value));
 };
 
 Stats Server::stats() const {
+    // read lock
     std::shared_lock lock(m_dictionary_mutex);
     return Stats{m_total, m_success, m_fail};
 };
 
 int main() {
     boost::asio::io_context io;
+
+    // handle stop signals
     boost::asio::signal_set signals(io, SIGINT, SIGTERM);
     signals.async_wait([&io](boost::system::error_code error, int signal) {
         if (!error) {
@@ -74,6 +82,7 @@ int main() {
 
     Server server(io);
 
+    // run boost asio io_context in multiple threads
     std::vector<std::thread> threads;
     auto io_run = [&io]() {
         for (;;) {
@@ -88,6 +97,7 @@ int main() {
 
     for (int i = 0; i < std::thread::hardware_concurrency(); ++i) { threads.emplace_back(std::thread(io_run)); }
 
+    // join for executed threads
     for (auto &thread: threads) thread.join();
     threads.clear();
 

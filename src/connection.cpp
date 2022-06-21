@@ -25,6 +25,9 @@ Connection::~Connection() {
     std::cout << "connection closed" << std::endl;
 }
 
+/**
+ *  Start connection by async read something from socket
+ */
 void Connection::start() {
     m_socket.async_read_some(boost::asio::buffer(m_data),
                              boost::bind(&Connection::handle_read,
@@ -33,15 +36,22 @@ void Connection::start() {
                                          boost::asio::placeholders::bytes_transferred));
 }
 
+/**
+ * Handle async read.
+ * If an error occurs or bytes_transferred is 0 then close connection
+ * @param error
+ * @param bytes_transferred
+ */
 void Connection::handle_read(const boost::system::error_code &error,
                              size_t bytes_transferred) {
     if (!error) {
         if (bytes_transferred > 0) {
             Request req;
+            // deserialize request
             auto state = bitsery::quickDeserialization<InputAdapter>({m_data.begin(), bytes_transferred}, req);
             if (state.first == bitsery::ReaderError::NoError && state.second) {
                 auto response = visit(*this, req);
-
+                // serialize response
                 auto writtenSize = bitsery::quickSerialization<OutputAdapter>(m_data, response);
 
                 boost::asio::async_write(m_socket,
@@ -59,6 +69,11 @@ void Connection::handle_read(const boost::system::error_code &error,
     }
 }
 
+/**
+ * Handle async write.
+ * On error connection is closed.
+ * @param error
+ */
 void Connection::handle_write(const boost::system::error_code &error) {
     if (!error) {
         m_socket.async_read_some(boost::asio::buffer(m_data),
@@ -71,30 +86,39 @@ void Connection::handle_write(const boost::system::error_code &error) {
     }
 }
 
-
+/**
+ * Visitor acceptor for GetRequest struct
+ * @param req
+ * @return
+ */
 template<>
 Response Connection::operator()(const GetRequest &req) {
-    // std::cout << "get request: " << req.key;
     auto r = m_dictionary.get(req.key);
     if (r.has_value()) {
-        //   std::cout << " response: " << *r << std::endl;
         return GetResponse{*r};
     } else {
-        //   std::cout << " not found" << std::endl;
         return NotFound{};
     }
 }
 
+/**
+ * Visitor acceptor for SetRequest struct
+ * @param req
+ * @return
+ */
 template<>
 Response Connection::operator()(const SetRequest &req) {
-    //std::cout << "set request: " << req.key << ":" << req.value << std::endl;
     m_dictionary.set(req.key, req.value);
     return SetResponse{};
 }
 
+/**
+ * Visitor acceptor for StatsRequest struct
+ * @param req
+ * @return
+ */
 template<>
 Response Connection::operator()(const StatsRequest &req) {
-    // std::cout << "stats request" << std::endl;
     auto stats = m_dictionary.stats();
     return StatsResponse{stats.total, stats.success, stats.fail};
 }
