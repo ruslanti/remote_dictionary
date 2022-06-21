@@ -59,7 +59,6 @@ void Server::set(std::string key, std::string value) {
 
 Stats Server::stats() const {
     std::shared_lock lock(m_dictionary_mutex);
-    std::cout<<m_total<<std::endl;
     return Stats{m_total, m_success, m_fail};
 };
 

@@ -105,14 +105,20 @@ static constexpr char InvalidData[] = "InvalidData";
 static constexpr char InvalidPointer[] = "InvalidPointer";
 static constexpr char Unknown[] = "Unknown";
 
-inline const char* ReaderError_to_string(bitsery::ReaderError error) {
+inline const char *ReaderError_to_string(bitsery::ReaderError error) {
     switch (error) {
-        case bitsery::ReaderError::NoError: return NoError;
-        case bitsery::ReaderError::ReadingError: return ReadingError;
-        case bitsery::ReaderError::DataOverflow: return DataOverflow;
-        case bitsery::ReaderError::InvalidData: return InvalidData;
-        case bitsery::ReaderError::InvalidPointer: return InvalidPointer;
-        default: return Unknown;
+        case bitsery::ReaderError::NoError:
+            return NoError;
+        case bitsery::ReaderError::ReadingError:
+            return ReadingError;
+        case bitsery::ReaderError::DataOverflow:
+            return DataOverflow;
+        case bitsery::ReaderError::InvalidData:
+            return InvalidData;
+        case bitsery::ReaderError::InvalidPointer:
+            return InvalidPointer;
+        default:
+            return Unknown;
     }
 }
 

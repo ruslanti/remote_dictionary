@@ -13,6 +13,7 @@
 class Connection : public std::enable_shared_from_this<Connection> {
 public:
     Connection(boost::asio::ip::tcp::socket socket, IDictionary &);
+
     virtual ~Connection();
 
     void start();

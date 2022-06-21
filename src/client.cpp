@@ -67,8 +67,8 @@ StatsResponse Client::stats() {
     auto state = bitsery::quickDeserialization<InputAdapter>({m_data.begin(), received}, res);
     if (state.first == bitsery::ReaderError::NoError && state.second) {
         if (std::holds_alternative<StatsResponse>(res)) {
-            auto stats =  std::get<StatsResponse>(res);
-            return StatsResponse{stats.total,stats.success,stats.fail};
+            auto stats = std::get<StatsResponse>(res);
+            return StatsResponse{stats.total, stats.success, stats.fail};
         } else if (std::holds_alternative<ErrorResponse>(res)) {
             throw std::runtime_error(std::get<ErrorResponse>(res).error);
         } else {

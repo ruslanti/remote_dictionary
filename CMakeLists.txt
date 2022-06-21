@@ -7,5 +7,3 @@ include_directories("bitsery/include")
 add_executable(dictionary src/server.cpp src/connection.cpp)
 
 add_executable(client src/client.cpp src/bench.cpp)
-
-add_executable(async_client src/async_client.cpp src/async_bench.cpp)

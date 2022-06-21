@@ -55,12 +55,11 @@ void Connection::handle_read(const boost::system::error_code &error,
             }
         }
     } else {
-        std::cerr << "read error: " << error.message() << std::endl;
+       // std::cerr << "read error: " << error.message() << std::endl;
     }
 }
 
 void Connection::handle_write(const boost::system::error_code &error) {
-    std::cerr << "write: " << error.message() << std::endl;
     if (!error) {
         m_socket.async_read_some(boost::asio::buffer(m_data),
                                  boost::bind(&Connection::handle_read,
@@ -75,27 +74,27 @@ void Connection::handle_write(const boost::system::error_code &error) {
 
 template<>
 Response Connection::operator()(const GetRequest &req) {
-   // std::cout << "get request: " << req.key;
+    // std::cout << "get request: " << req.key;
     auto r = m_dictionary.get(req.key);
     if (r.has_value()) {
-     //   std::cout << " response: " << *r << std::endl;
+        //   std::cout << " response: " << *r << std::endl;
         return GetResponse{*r};
     } else {
-     //   std::cout << " not found" << std::endl;
+        //   std::cout << " not found" << std::endl;
         return NotFound{};
     }
 }
 
 template<>
 Response Connection::operator()(const SetRequest &req) {
-    std::cout << "set request: " << req.key << ":" << req.value << std::endl;
+    //std::cout << "set request: " << req.key << ":" << req.value << std::endl;
     m_dictionary.set(req.key, req.value);
     return SetResponse{};
 }
 
 template<>
 Response Connection::operator()(const StatsRequest &req) {
-   // std::cout << "stats request" << std::endl;
+    // std::cout << "stats request" << std::endl;
     auto stats = m_dictionary.stats();
     return StatsResponse{stats.total, stats.success, stats.fail};
 }
